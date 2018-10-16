@@ -1,6 +1,4 @@
-'use strict';
-
-// <================= 💬 dependecies =================>
+// <================= dependecies =================>
 const express = require('express');
 const exphbs = require('express-handlebars');
 const bodyParser = require('body-parser');
@@ -8,7 +6,7 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 
-// <================= 💊 set up express =================>
+// <================= set up express =================>
 const PORT = process.env.PORT || 4000;
 let app = express();
 
