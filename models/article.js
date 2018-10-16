@@ -1,32 +1,48 @@
-var mongoose = require("mongoose");
+// Dependecies
+// =================
+const mongoose = require('mongoose'),
+    uniqueValidator = require('mongoose-unique-validator');
 
-// Save a reference to the Schema constructor
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-// Using the Schema constructor, create a new UserSchema object
-// This is similar to a Sequelize model
-var ArticleSchema = new Schema({
-  // `title` is required and of type String
-  title: {
-    type: String,
-    required: true
-  },
-  // `link` is required and of type String
-  link: {
-    type: String,
-    required: true
-  },
-  // `note` is an object that stores a Note id
-  // The ref property links the ObjectId to the Note model
-  // This allows us to populate the Article with an associated Note
-  note: {
-    type: Schema.Types.ObjectId,
-    ref: "Note"
-  }
+const ArticleSchema = new Schema({
+    title: {
+        type: String,
+        required: true
+    },
+
+    link: {
+        type: String,
+        unique: true,
+        required: true
+    },
+
+    saved: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+
+    deleted: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+
+    date: {
+        type: Date,
+        default: Date.now
+    },
+
+    notes: [{
+        type: Schema.Types.ObjectId,
+        ref: "Note",
+        required: false
+    }]
 });
 
-// This creates our model from the above schema, using mongoose's model method
-var Article = mongoose.model("Article", ArticleSchema);
+ArticleSchema.plugin(uniqueValidator);
 
-// Export the Article model
+const Article = mongoose.model("Article", ArticleSchema);
+
 module.exports = Article;

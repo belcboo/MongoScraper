@@ -10,7 +10,7 @@ var axios = require("axios");
 
 
 //DEFINING PORT
-var PORT = process.env.PORT || 3000;
+var PORT = process.env.PORT || 4000;
 var mode = process.env.NODE_ENV;
 var app = express();
 
