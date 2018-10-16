@@ -1,65 +1,44 @@
-// DEPENDENCIES
+'use strict';
 
-require("dotenv").config();
-var express = require("express");
-var bodyParser = require("body-parser");
-var exphbs = require("express-handlebars");
-var logger = require("morgan");
-var cheerio = require("cheerio");
-var axios = require("axios");
+// <================= 💬 dependecies =================>
+const express = require('express');
+const exphbs = require('express-handlebars');
+const bodyParser = require('body-parser');
+const logger = require('morgan');
+const mongoose = require('mongoose');
+const methodOverride = require('method-override');
 
+// <================= 💊 set up express =================>
+const PORT = process.env.PORT || 4000;
+let app = express();
 
-//DEFINING PORT
-var PORT = process.env.PORT || 4000;
-var mode = process.env.NODE_ENV;
-var app = express();
+app
+    .use(bodyParser.json())
+    .use(bodyParser.urlencoded({ extended:true }))
+    .use(bodyParser.text())
+    .use(bodyParser.json({ type: 'application/vnd.api+json' }))
+    .use(methodOverride('_method'))
+    .use(logger('dev'))
+    .use(express.static(__dirname + '/public'))
+    .engine('handlebars', exphbs({ defaultLayout: 'main' }))
+    .set('view engine', 'handlebars')
+    .use(require('./controllers'));
 
+// <=================  set up mongoose =================>
+mongoose.Promise = Promise;
 
-//MIDDLEWARE
-app.use(logger("dev"));
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-app.use(bodyParser.json());
-app.use(express.static("public"));
-// Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/nytpopulater");
+const dbURI = process.env.MONGODB_URI || "mongodb://localhost/scraper";
 
-//HANDLEBARS
-app.engine(
-  "handlebars",
-  exphbs({
-    defaultLayout: "main"
-  })
-);
-app.set("view engine", "handlebars");
+mongoose.connect(dbURI, { useNewUrlParser: true } );
+mongoose.set('useCreateIndex', true);
 
-app.get("/scrape", function(req, res) {
+const db = mongoose.connection;
 
-      //We request the body using axios.
-      axios.get("http://www.nytimes.com").then(function(response) {
+db.on("open", function() {
+    console.log("Mongoose connection successful.");
+    app.listen(PORT, function() {
+        console.log("App running on port" + PORT);
+    });
+});
 
-        //Loading response into cherio.
-        var $ = cherio.load(response.data);
-
-        // Looking for h2 tags.
-        $("article h2").each(function(i, element) {
-          // Save an empty result object
-          var result = {};
-
-          // Add the text and href of every link, and save them as properties of the result object
-          result.title = $(this)
-            .children("a")
-            .text();
-          result.link = $(this)
-            .children("a")
-            .attr("href");
-        })
-      })
-      //ROUTES
-
-
-      //STARTING EXPRESS SERVER
-      app.listen(PORT, function() {
-        console.log("App running on port " + PORT + "!");
-      });
+module.exports = app;
